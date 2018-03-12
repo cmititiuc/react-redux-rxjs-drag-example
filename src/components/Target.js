@@ -33,6 +33,7 @@ class Target extends Component {
       >
         <div
           id="target"
+          ref={el => this.target = el}
           onMouseDown={this.handleMouseDown}
           onMouseUp={this.handleMouseUp}
           onTouchStart={this.handleTouchStart}

@@ -21,7 +21,7 @@ function initializeSubjects() {
 function transformMove(rootRect, startX, startY) {
   return function(moveEvent) {
     moveEvent.preventDefault();
-    const move = moveEvent.targetTouches ? moveEvent.targetTouches[0] : moveEvent
+    const move = moveEvent.targetTouches ? moveEvent.targetTouches[0] : moveEvent;
 
     return {
       top: move.clientY - rootRect.top - startY,
@@ -33,13 +33,13 @@ function transformMove(rootRect, startX, startY) {
 // originEvent - either a mouse down event or a touch start event
 // move$ - either a mouse move stream or a touch move stream
 // terminus$ - either a mouse up stream or a touch end stream
-function transformOrigin(container, move$, terminus$) {
+function transformOrigin(target, container, move$, terminus$) {
   return function(originEvent) {
     const origin = originEvent.targetTouches ? originEvent.targetTouches[0] : originEvent
         , rootRect = container.getBoundingClientRect()
-        , dragTargetRect = originEvent.target.getBoundingClientRect()
-        , startX = origin.clientX - dragTargetRect.left
-        , startY = origin.clientY - dragTargetRect.top
+        , targetRect = target.getBoundingClientRect()
+        , startX = origin.clientX - targetRect.left
+        , startY = origin.clientY - targetRect.top
         ;
 
     return move$.map(transformMove(rootRect, startX, startY)).takeUntil(terminus$);
@@ -50,13 +50,13 @@ function onMount(dispatch) {
   initializeSubjects.bind(this)();
 
   const { mousedown$, mousemove$, mouseup$, touchstart$, touchmove$, touchend$,
-          container
+          target, container
         } = this
       , mousedrag$ = mousedown$.mergeMap(
-          transformOrigin(container, mousemove$, mouseup$)
+          transformOrigin(target, container, mousemove$, mouseup$)
         )
       , touchdrag$ = touchstart$.mergeMap(
-          transformOrigin(container, touchmove$, touchend$)
+          transformOrigin(target, container, touchmove$, touchend$)
         )
       , drag$ = merge(mousedrag$, touchdrag$)
       ;
